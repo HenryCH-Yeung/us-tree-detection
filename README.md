@@ -1,6 +1,6 @@
-## Urban Tree Detection ##
+## Tree Detection ##
 
-This repository provides code for training and evaluating a convolutional neural network (CNN) to detect tree in urban environments with aerial imagery.   The CNN takes multispectral imagery as input and outputs a confidence map indicating the locations of trees. The individual tree locations are found by local peak finding. In our study site in Southern California, we determined that, using our trained model, 73.6% of the detected trees matched to actual trees, and 73.3% of the trees in the study area were detected.
+This repository provides code for training and evaluating a convolutional neural network (CNN) to detect trees / dead trees with aerial imagery.   The CNN takes multispectral imagery as input and outputs a confidence map and a scale map that predict the locations and crown sizes of trees. The individual tree locations are found by local peak finding, and the tree crown sizes are determined by marker-controlled watershed segmentation of the confidence map. The algorithm takes adventage of attention mechanism and weighted focal loss to improve detection accuracy. Users can also choose amongst three popular deep learning backbones (VGG, Resnet and Efficientnet).
 
 ### Installation ###
 
@@ -26,27 +26,47 @@ For Python 3.11.4 and TensorFlow 2.18.0, you may run
     pip install optuna
     pip install matplotlib
 
+To activate the environment in the future:
+
+    cd ~
+    source env/bin/activate
+
+
 ### Dataset ###
 
-The data used in our paper can be found in [a separate Github repository](https://github.com/jonathanventura/urban-tree-detection-data/).
+The model expects a standardized dataset and folder structure: 
 
-To prepare a dataset for training and testing, run the `prepare.py` script.  You can specify the bands in the input raster using the `--bands` flag (currently `RGB` and `RGBN` are supported.)
+    data/
+    ├── images/
+    │   ├── image_FL_2021_001.tif
+    │   ├── image_TX_2020_023.tif
+    ├── labels.gpkg
 
-    python3 -m scripts.prepare <path to dataset> <path to hdf5 file> --bands <RGB or RGBN>
+- an image folder containing images stored as .tifs
+- a .gpkg containing point labels of individual trees
+- the images and labels should overlap with each other geographically
 
-For example,
 
-    python3 -m scripts.prepare ../urban-tree-detection-data prepared_data.hdf5
+First, setup your configurations (e.g. input and output directory) in the `configuration.py` script. 
+
+To organize data for the subsequent training procedures, run the `organize.py` script.  
+
+    python3 -m organize.prepare 
+
+Then, use the `split.py` script to create the desired train, validation, and test split of the training data. The default setting expects an independent test.txt file. To generate test data from the full dataset, use the `--generate_test`  option.
+
+    python3 -m split.split 
+
+Finally, to prepare a dataset for model, run the `prepare.py` script.  You can specify the bands in the input raster using the `--bands` flag (currently `RGB` and `RGBN` are supported.)
+
+    python3 -m scripts.prepare 
+
 
 ### Training ###
 
 To train the model, run the `train.py` script.
 
-    python3 -m scripts.train <path to hdf5 file> <path to log directory>
-
-For example,
-
-    python3 -m scripts.train prepared_data.hdf5 logs 
+    python3 -m scripts.train
 
 ### Hyperparameter tuning ###
 
@@ -64,9 +84,6 @@ Once hyperparameter tuning finishes, use the `test.py` script to compute evaluat
 
     python3 -m scripts.test <path to hdf5 file> <path to log directory> --center_crop --rearrange_channels
 
-For example,
-
-    python3 -m scripts.test prepared_data.hdf5 logs
 
 ### Inference on a large raster ###
 
@@ -82,11 +99,9 @@ For example,
 
 The following pre-trained models are available:
 
-| Imagery   | Years     | Bands    | Region                         | Log Directory Archive     |
-|-----------|-----------|----------|--------------------------------|---------------------------|
-| 60cm NAIP | 2016-2020 | RGBN     | Northern & Southern California | [OneDrive](https://cpslo-my.sharepoint.com/:u:/g/personal/jventu09_calpoly_edu/ES31TXWdeGRFj_hn3O4qZpoBfhye_ssuULyaC2WB7yaJTw?e=cYkjMf) |
-| 60cm NAIP | 2016-2020 | RGB      | Northern & Southern California | [OneDrive](https://cpslo-my.sharepoint.com/:u:/g/personal/jventu09_calpoly_edu/Eay6v76obwpIqJmeK23_4zUBNb5EwM6R36wcSqh_BWKj_g?e=JrOwkO)
-| 60cm NAIP | 2020      | RGBN     | Southern California            | [OneDrive](https://cpslo-my.sharepoint.com/:u:/g/personal/jventu09_calpoly_edu/EQMSOBZjuDFCjj_PNgSDXZ0BMQUcGQKUO_SlJ5SGH2Bl9Q?e=9RhhpN)
+| Imagery   | Years     | Bands    | Region              | Log Directory Archive     |
+|-----------|-----------|----------|---------------------|---------------------------|
+| 60cm NAIP | 2018-2022 | RGBN     | US Atlantic Coast   | [OneDrive](https://cpslo-my.sharepoint.com/:u:/g/personal/jventu09_calpoly_edu/ES31TXWdeGRFj_hn3O4qZpoBfhye_ssuULyaC2WB7yaJTw?e=cYkjMf)
 
 We also provide an [example NAIP 2020 tile from Los Angeles](https://cpslo-my.sharepoint.com/:i:/g/personal/jventu09_calpoly_edu/EU1xfporUiBDvT2ZOpW0raEBOqJcJQpqcOv1lKNMCgbCdQ?e=zsgxXs) and an [example GeoJSON predictions file from the RGBN 2016-2020 model](https://cpslo-my.sharepoint.com/:u:/g/personal/jventu09_calpoly_edu/EUHYGnWdqL5FvYc1wm9hSl8BBdL2JEgMSlqS1FiTdB0EWA?e=uZMIBc).  
 
