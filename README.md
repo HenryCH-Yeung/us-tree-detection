@@ -1,15 +1,10 @@
 ## Tree Detection ##
 
-This repository provides code for training and evaluating a convolutional neural network (CNN) to detect trees / dead trees with aerial imagery.   The CNN takes multispectral imagery as input and outputs a confidence map and a scale map that predict the locations and crown sizes of trees. The individual tree locations are found by local peak finding, and the tree crown sizes are determined by marker-controlled watershed segmentation of the confidence map. The algorithm takes adventage of attention mechanism and weighted focal loss to improve detection accuracy. Users can also choose amongst three popular deep learning backbones (VGG, Resnet and Efficientnet).
+This repository provides code for training and evaluating a convolutional neural network (CNN) to detect trees / dead trees with aerial imagery. The CNN takes multispectral imagery as input and outputs a confidence map and a scale map that predict the locations and crown sizes of trees. The individual tree locations are found by local peak finding, and the tree crown sizes are determined by marker-controlled watershed segmentation of the confidence map. The algorithm takes adventage of attention mechanism and weighted focal loss to improve detection accuracy. Users can also choose amongst three popular deep learning backbones (VGG, Resnet and Efficientnet). The repository was modified from the large-scale urban tree detection algorithm (Ventura et al. 2024), with the implementation of weighted scale-adaptive heatmap regression (Luo et al. 2021). 
 
 ### Installation ###
 
-The model is implemented with Python 3.11.4 and TensorFlow 2.18.0.  We have provided an `environment.yml` file for earlier versions of Python and TensorFlow so that you can easily create a conda environment with the dependencies installed:
-
-    conda env create 
-    conda activate urban-tree-detection
-
-For Python 3.11.4 and TensorFlow 2.18.0, you may run
+The model is implemented with Python 3.11.4 and TensorFlow 2.18.0. You may setup the environment using:
 
     python -m venv env
     source env/bin/activate
@@ -32,6 +27,12 @@ To activate the environment in the future:
     source env/bin/activate
 
 
+Alternatively, we have provided an `environment.yml` file for earlier versions of Python and TensorFlow so that you can easily create a conda environment with the dependencies installed:
+
+    conda env create 
+    conda activate us-tree-detection
+
+
 ### Dataset ###
 
 The model expects a standardized dataset and folder structure: 
@@ -49,7 +50,7 @@ The model expects a standardized dataset and folder structure:
 
 First, setup your configurations (e.g. input and output directory) in the `configuration.py` script. 
 
-To organize data for the subsequent training procedures, run the `organize.py` script.  
+To organize data for the subsequent training procedures, run the `organize.py` script. The script will automatically crop images to 256x256 patches that are required for model training.
 
     python3 -m organize.prepare 
 
@@ -109,11 +110,9 @@ You can explore a [map of predictions for the entire urban reserve of California
 
 ### Using your own data ###
 
-To train on your own data, you will need to organize the data into the format expected by `prepare.py`.
+To train on your own data, you will need to organize the data into the format expected by `organize.py`.
 
-* The image crops (or "chips") should all be the same size and the side length should be a multiple of 32.
 * The code is currently designed for three-band (RGB) or four-band (red, green, blue, near-IR) imagery.  To handle more bands, you would need to add an appropriate preprocessing function in `utils/preprocess.py`.  If RGB are not in the bands, then `models/VGG.py` would need to be modified, as the code expects the first three bands to be RGB to match the pre-trained weights.
-* Store the images as TIFF or PNG files in a subdirectory called `images`.
 * For each image, store a csv file containing x,y coordinates for the tree locations in a file `<name>.csv` where `<name>.tif`, `<name>.tiff`, or `<name>.png` is the corresponding image. The csv file should have a single header line.
 * Create the files `train.txt`, `val.txt`, and `test.txt` to specify the names of the files in each split.
 
