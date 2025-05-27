@@ -124,4 +124,4 @@ J. Ventura, C. Pawlak, M. Honsberger, C. Gonsalves, J. Rice, N.L.R. Love, S. Han
 
 ### Acknowledgments ###
 
-This project was funded by CAL FIRE (award number: 8GB18415) the US Forest Service (award number: 21-CS-11052021-201), and an incubation grant from the Data Science Strategic Research Initiative at California Polytechnic State University.
+This project was funded by the NASA Coastal Resilience grant (award number: 80NSSC23K0127). The research was also supported by the research grant from Department of Environmental Sciences and the support from the School of Data Science Capstone project at the University of Virginia. We give special thanks to Thomas Lever, Mahin Ganesan, Nicholas Miller, and Brendan Jalali for their contribution in modifying and testing the network in the early-stage.
