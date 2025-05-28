@@ -23,7 +23,7 @@ The model is implemented with Python 3.11.4 and TensorFlow 2.18.0. You may setup
 
 To activate the environment in the future:
 
-    cd ~
+    cd ~/us-tree-detection
     source env/bin/activate
 
 
